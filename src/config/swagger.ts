@@ -9,9 +9,18 @@ const options: swaggerJsdoc.Options = {
     info: {
       title: "E-commerce API",
       version: "1.0.0",
-      description: "An e-commerce backend built with Express, TypeScript and MongoDB",
+      description: "A small e-commerce backend built with Express, TypeScript and MongoDB",
     },
     servers: [{ url: `http://localhost:${PORT}` }],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
   },
   apis: [path.join(__dirname, "../routes/*.{ts,js}").replace(/\\/g, "/")],
 };
