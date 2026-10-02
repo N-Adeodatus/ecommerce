@@ -4,6 +4,7 @@ import { swaggerSpec } from "./config/swagger";
 import healthRoutes from "./routes/healthRoutes";
 import authRoutes from "./routes/authRoutes";
 import productRoutes from "./routes/productRoutes";
+import orderRoutes from "./routes/orderRoutes";
 
 const app = express();
 
@@ -13,5 +14,6 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/health", healthRoutes);
 app.use("/auth", authRoutes);
 app.use("/products", productRoutes);
+app.use("/orders", orderRoutes);
 
 export default app;
