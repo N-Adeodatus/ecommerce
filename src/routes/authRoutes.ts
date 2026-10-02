@@ -1,6 +1,7 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import { register, login, getMe } from "../controllers/authController";
 import { protect } from "../middleware/auth";
+import { adminOnly } from "../middleware/admin";
 
 const router = Router();
 
@@ -23,7 +24,7 @@ const router = Router();
  *                 example: Ada Lovelace
  *               email:
  *                 type: string
- *                 example: adeodatus@example.com
+ *                 example: ada@example.com
  *               password:
  *                 type: string
  *                 minLength: 6
@@ -54,7 +55,7 @@ router.post("/register", register);
  *             properties:
  *               email:
  *                 type: string
- *                 example: adeodatus@example.com
+ *                 example: ada@example.com
  *               password:
  *                 type: string
  *                 example: secret123
@@ -85,5 +86,25 @@ router.post("/login", login);
  *         description: User no longer exists
  */
 router.get("/me", protect, getMe);
+
+/**
+ * @swagger
+ * /auth/admin-check:
+ *   get:
+ *     summary: Temporary route to test the admin check
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: The caller is an admin
+ *       401:
+ *         description: Missing, invalid or expired token
+ *       403:
+ *         description: The caller is not an admin
+ */
+router.get("/admin-check", protect, adminOnly, (_req: Request, res: Response) => {
+  res.json({ message: "Welcome, admin" });
+});
 
 export default router;
