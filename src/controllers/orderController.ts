@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { Order, IOrderItem } from "../models/Order";
 import { Product } from "../models/Product";
+import { User } from "../models/User";
+import { sendEmail } from "../services/emailService";
 
 type Reservation = { productId: string; quantity: number };
 
@@ -95,6 +97,19 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     });
 
     reserved.length = 0;
+
+    // Fetch user for email address asynchronously
+    User.findById(req.user.id).then(user => {
+      if (user) {
+        const orderHtml = orderItems.map(item => `<li>${item.quantity}x ${item.name} - $${item.price.toFixed(2)}</li>`).join("");
+        sendEmail({
+          to: [{ email: user.email, name: user.name }],
+          subject: "Your Order Confirmation",
+          htmlContent: `<h1>Thank you for your order!</h1><p>Your order total is <strong>$${(totalCents / 100).toFixed(2)}</strong>.</p><ul>${orderHtml}</ul>`
+        }).catch(err => console.error("Failed to send order confirmation email:", err.message || err));
+      }
+    }).catch(err => console.error("Failed to fetch user for order email:", err));
+
     res.status(201).json(order);
   } catch (error) {
     await restoreStock(reserved);

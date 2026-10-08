@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { User } from "../models/User";
+import { sendEmail } from "../services/emailService";
 
 function signToken(id: string, role: string): string {
   const secret = process.env.JWT_SECRET;
@@ -39,6 +40,15 @@ export async function register(req: Request, res: Response): Promise<void> {
     }
 
     const user = await User.create({ name, email: normalizedEmail, password });
+
+    // Send welcome email in background
+    sendEmail({
+      to: [{ email: user.email, name: user.name }],
+      subject: "Welcome to Our Store!",
+      htmlContent: `<h1>Welcome, ${user.name}!</h1><p>We're excited to have you on board. Start exploring our products today.</p>`
+    }).catch((err) => {
+      console.error("Failed to send welcome email:", err.message || err);
+    });
 
     res.status(201).json({
       id: user._id,
